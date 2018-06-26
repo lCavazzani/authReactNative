@@ -5,7 +5,7 @@ import { Button, Card, CardSection, Input, Spinner } from './common/index';
 
 class LoginForm extends Component {
     state = {
-        emial: '',
+        email: '',
         password: '',
         error: '',
         loading: false
@@ -14,13 +14,27 @@ class LoginForm extends Component {
         const { email, password } = this.state;
         this.setState({ error: '', loading: true });
         firebase.auth().signInWithEmailAndPassword(email, password)
+        .then(this.onLoginSuccess.bind(this))
         .catch(() => {
             firebase.auth().createUserWithEmailAndPassword(email, password)
-            .catch(() => {
-                this.setState({ error: 'Authentication Falied', loading: false });
-            });
+            .then(this.onLoginSuccess.bind(this))
+            .catch(this.onLoginFail.bind(this));
         });
     }
+
+    onLoginFail() {
+        this.setState({ error: 'Authentication Falied', loading: false });
+    }
+
+    onLoginSuccess() {
+        this.setState({
+            email: '',
+            password: '',
+            loading: false,
+            error: ''
+        });
+    }
+
     renderButton() {
         if (this.state.loading) {
             return <Spinner size='small' />;
